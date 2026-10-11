@@ -1,0 +1,56 @@
+name: Build iOS App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check Xcode
+        run: xcodebuild -version
+
+      - name: Install Kivy iOS tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install kivy-ios
+
+      - name: Build Python dependencies
+        run: |
+          toolchain build python3
+          toolchain build kivy
+
+      - name: Create iOS project
+        run: |
+          toolchain create BrickBreaker .
+          ls -la BrickBreaker-ios
+
+      - name: Build iOS project
+        run: |
+          cd BrickBreaker-ios
+          xcodebuild \
+            -project BrickBreaker.xcodeproj \
+            -scheme BrickBreaker \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Upload iOS build
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-logs-and-project
+          path: |
+            BrickBreaker-ios/
+          if-no-files-found: warn
