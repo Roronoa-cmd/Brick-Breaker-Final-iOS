@@ -32,9 +32,22 @@ jobs:
         run: |
           toolchain build python3 kivy
 
+      - name: Prepare clean app folder
+        run: |
+          mkdir -p app
+          rsync -a \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'app' \
+            --exclude 'build' \
+            --exclude 'dist' \
+            --exclude '*-ios' \
+            ./ app/
+          ls -la app
+
       - name: Create iOS project
         run: |
-          toolchain create brickbreaker .
+          toolchain create brickbreaker "$GITHUB_WORKSPACE/app"
           ls -la brickbreaker-ios
 
       - name: Find Xcode scheme
@@ -60,7 +73,7 @@ jobs:
             -scheme "$SCHEME" \
             -sdk iphonesimulator \
             -configuration Debug \
-            -derivedDataPath build \
+            -derivedDataPath "$RUNNER_TEMP/derived" \
             ARCHS=arm64 \
             ONLY_ACTIVE_ARCH=YES \
             IPHONEOS_DEPLOYMENT_TARGET=12.0 \
@@ -72,5 +85,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: brick-breaker-ios-build
-          path: brickbreaker-ios/
+          path: ${{ runner.temp }}/derived/Build/Products/Debug-iphonesimulator/*.app
           if-no-files-found: warn
