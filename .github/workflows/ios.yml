@@ -43,18 +43,26 @@ jobs:
         run: |
           cd brickbreaker-ios
           xcodebuild -list -project brickbreaker.xcodeproj
-
+          
       - name: Build iOS Simulator project
         run: |
           cd brickbreaker-ios
+          SCHEME=$(xcodebuild -list -project brickbreaker.xcodeproj | sed -n '/Schemes:/,$p' | grep -v 'Schemes:' | grep -v '^$' | head -n 1 | xargs)
+          echo "Using scheme: $SCHEME"
+          if [ -z "$SCHEME" ]; then
+            echo "No Xcode scheme found."
+            exit 1
+          fi
           xcodebuild \
             -project brickbreaker.xcodeproj \
+            -scheme "$SCHEME" \
             -sdk iphonesimulator \
             -configuration Debug \
             -derivedDataPath build \
             IPHONEOS_DEPLOYMENT_TARGET=11.0 \
             CODE_SIGNING_ALLOWED=NO \
             build
+
 
       - name: Upload iOS build
         if: always()
