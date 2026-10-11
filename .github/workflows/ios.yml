@@ -31,8 +31,8 @@ jobs:
 
       - name: Build Python dependencies
         run: |
-          toolchain build python3
-          toolchain build kivy
+          toolchain build python3 --arch=x86_64
+          toolchain build kivy --arch=x86_64
 
       - name: Create iOS project
         run: |
@@ -47,8 +47,6 @@ jobs:
       - name: Build iOS Simulator project
         run: |
           cd brickbreaker-ios
-
-          xcodebuild -list -project brickbreaker.xcodeproj
 
           SCHEME=$(xcodebuild -list -project brickbreaker.xcodeproj 2>/dev/null | awk '/Build Targets:/{exit} /Schemes:/{found=1; next} found && NF {gsub(/^[ \t]+|[ \t]+$/, ""); print; exit}')
 
@@ -65,6 +63,9 @@ jobs:
             -sdk iphonesimulator \
             -configuration Debug \
             -derivedDataPath build \
+            -arch x86_64 \
+            ARCHS=x86_64 \
+            ONLY_ACTIVE_ARCH=YES \
             IPHONEOS_DEPLOYMENT_TARGET=11.0 \
             CODE_SIGNING_ALLOWED=NO \
             build
