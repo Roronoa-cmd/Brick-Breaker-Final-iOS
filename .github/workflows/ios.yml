@@ -36,15 +36,19 @@ jobs:
 
       - name: Create iOS project
         run: |
-          toolchain create BrickBreaker .
-          ls -la BrickBreaker-ios
+          toolchain create brickbreaker .
+          ls -la brickbreaker-ios
+
+      - name: Find Xcode scheme
+        run: |
+          cd brickbreaker-ios
+          xcodebuild -list -project brickbreaker.xcodeproj
 
       - name: Build iOS Simulator project
         run: |
-          cd BrickBreaker-ios
+          cd brickbreaker-ios
           xcodebuild \
-            -project BrickBreaker.xcodeproj \
-            -scheme BrickBreaker \
+            -project brickbreaker.xcodeproj \
             -sdk iphonesimulator \
             -configuration Debug \
             -derivedDataPath build \
@@ -57,5 +61,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: brick-breaker-ios-build
-          path: BrickBreaker-ios/
+          path: brickbreaker-ios/
           if-no-files-found: warn
