@@ -33,3 +33,29 @@ jobs:
         run: |
           toolchain build python3
           toolchain build kivy
+
+      - name: Create iOS project
+        run: |
+          toolchain create BrickBreaker .
+          ls -la BrickBreaker-ios
+
+      - name: Build iOS Simulator project
+        run: |
+          cd BrickBreaker-ios
+          xcodebuild \
+            -project BrickBreaker.xcodeproj \
+            -scheme BrickBreaker \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath build \
+            IPHONEOS_DEPLOYMENT_TARGET=11.0 \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Upload iOS build
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brick-breaker-ios-build
+          path: BrickBreaker-ios/
+          if-no-files-found: warn
